@@ -1,4 +1,4 @@
-// lib/screens/root_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:news_user_app/screens/newspaper_screens.dart';
 
@@ -19,14 +19,14 @@ class RootScreen extends StatefulWidget {
 class _RootScreenState extends State<RootScreen> {
   int _index = 0;
 
-  // Keep pages alive (state preserved when switching tabs)
+  
   final List<Widget> _pages = const [
-    ExploreScreen(),     // Home
-    CategoriesScreen(),  // All categories
-    MagazinesScreen(),   // Premium magazines (glossy grid)
-    NewspapersScreen(),  // Daily newspapers (simple list)
-    ArticlesScreen(),    // Articles feed (blog-style)
-    SearchScreen(),      // Search
+    ExploreScreen(),     
+    CategoriesScreen(),  
+    MagazinesScreen(),   
+    NewspapersScreen(),  
+    ArticlesScreen(),    
+    SearchScreen(),   
   ];
 
   @override

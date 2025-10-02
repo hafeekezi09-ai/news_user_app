@@ -11,7 +11,7 @@ class TrendingNewsScreen extends StatelessWidget {
     final q = FirebaseFirestore.instance
         .collection('news')
         .where('status', isEqualTo: 'published')
-        .where('isTrending', isEqualTo: true) // ✅ trending only
+        .where('isTrending', isEqualTo: true) 
         .orderBy('publishedAt', descending: true)
         .limit(20);
 

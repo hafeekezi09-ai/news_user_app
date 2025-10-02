@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _service = NewsService();
 
-  /// null => All, '_trending' => Trending, otherwise categoryId
   final ValueNotifier<String?> _selectedCategoryId =
       ValueNotifier<String?>(null);
 
@@ -38,10 +37,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ValueListenableBuilder<String?>(
           valueListenable: _selectedCategoryId,
           builder: (context, selectedId, _) {
-            // pick stream based on chips
+        
             final Stream<List<News>> stream = switch (selectedId) {
               null => _service.streamPublished(),
-              '_trending' => _service.streamTrending(), // or byViews: true
+              '_trending' => _service.streamTrending(), 
               String id => _service.streamByCategory(id),
             };
 
@@ -103,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return NewsCard(
                             news: n,
                             onTap: () {
-                              // optional: bump views
+                             
                               final id = n.id;
                               if (id != null) {
                                 NewsService().incrementViews(id);
@@ -153,10 +152,7 @@ class _ChipsSliver extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 4),
         child: CategoryChipsBar(
-          // CategoryChipsBar must set .value to:
-          //   null        -> All
-          //   '_trending' -> Trending
-          //   '<id>'      -> category id
+          
           selectedCategoryId:
               selectedCategoryId ?? ValueNotifier<String?>(null),
         ),

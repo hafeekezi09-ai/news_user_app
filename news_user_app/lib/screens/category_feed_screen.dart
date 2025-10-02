@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoryFeedScreen extends StatelessWidget {
-  final String categoryId;   // Firestore la store panna irukkura category id
-  final String categoryName; // Display title
+  final String categoryId;   
+  final String categoryName; 
 
   const CategoryFeedScreen({
     super.key,
@@ -17,8 +17,8 @@ class CategoryFeedScreen extends StatelessWidget {
       appBar: AppBar(title: Text(categoryName)),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('news')                    // 🔥 your news collection
-            .where('categoryId', isEqualTo: categoryId) // filter by categoryId
+            .collection('news')                   
+            .where('categoryId', isEqualTo: categoryId) 
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -45,7 +45,7 @@ class CategoryFeedScreen extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   onTap: () {
-                    // Optional: Navigate to news detail screen
+                    
                   },
                 ),
               );

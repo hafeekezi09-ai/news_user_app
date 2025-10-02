@@ -17,30 +17,32 @@ class NewsService {
   }
 
   // ---------- streams ----------
-  /// All published (client-side sort => no composite index needed)
+
   Stream<List<News>> streamPublished({int limit = 50}) {
     return _news
         .where('status', isEqualTo: 'published')
         .limit(limit)
         .snapshots()
-        .map((s) => _sortByPublishedAtDesc(
-              s.docs.map((d) => News.fromMap(d.id, d.data())),
-            ));
+        .map(
+          (s) => _sortByPublishedAtDesc(
+            s.docs.map((d) => News.fromMap(d.id, d.data())),
+          ),
+        );
   }
 
-  /// Published by category (client-side sort)
   Stream<List<News>> streamByCategory(String categoryId, {int limit = 50}) {
     return _news
         .where('status', isEqualTo: 'published')
         .where('categoryId', isEqualTo: categoryId)
         .limit(limit)
         .snapshots()
-        .map((s) => _sortByPublishedAtDesc(
-              s.docs.map((d) => News.fromMap(d.id, d.data())),
-            ));
+        .map(
+          (s) => _sortByPublishedAtDesc(
+            s.docs.map((d) => News.fromMap(d.id, d.data())),
+          ),
+        );
   }
 
-  /// Trending (client-side sort). Set [byViews]=true to rank by views first.
   Stream<List<News>> streamTrending({bool byViews = false, int limit = 50}) {
     return _news
         .where('status', isEqualTo: 'published')
@@ -48,19 +50,21 @@ class NewsService {
         .limit(limit)
         .snapshots()
         .map((s) {
-      var items = s.docs.map((d) => News.fromMap(d.id, d.data())).toList();
-      if (byViews) {
-        items.sort((a, b) {
-          final v = b.views.compareTo(a.views); // popularity first
-          if (v != 0) return v;
-          final aT = a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bT = b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          return bT.compareTo(aT);
+          var items = s.docs.map((d) => News.fromMap(d.id, d.data())).toList();
+          if (byViews) {
+            items.sort((a, b) {
+              final v = b.views.compareTo(a.views);
+              if (v != 0) return v;
+              final aT =
+                  a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bT =
+                  b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              return bT.compareTo(aT);
+            });
+            return items;
+          }
+          return _sortByPublishedAtDesc(items);
         });
-        return items;
-      }
-      return _sortByPublishedAtDesc(items);
-    });
   }
 
   // ---------- utilities ----------
@@ -74,7 +78,6 @@ class NewsService {
     return News.fromMap(d.id, d.data()!);
   }
 
-  // legacy aliases (if older code calls these)
   Stream<List<News>> getPublishedNews() => streamPublished();
   Stream<List<News>> getNewsByCategory(String categoryId) =>
       streamByCategory(categoryId);

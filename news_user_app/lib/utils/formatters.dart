@@ -1,5 +1,4 @@
-// lib/utils/formatters.dart
-/// Turns a DateTime into "just now", "30 mins ago", "1 day ago", etc.
+
 String timeAgo(DateTime? dateTime) {
   if (dateTime == null) return '';
   final now = DateTime.now();

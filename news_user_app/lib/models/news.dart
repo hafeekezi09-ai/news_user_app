@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class News {
-  final String? id;                    // <- nullable: create-க்கு உதவும்
+  final String? id;                    
   final String title;
   final String content;
   final String imageUrl;
-  final String type;                   // 'article' | 'magazine' | 'newspaper'
-  final String status;                 // 'draft' | 'published'
-  final String? categoryId;            // optional link
-  final String? authorId;              // optional
+  final String type;                   
+  final String status;                 
+  final String? categoryId;            
+  final String? authorId;              
   final DateTime? publishedAt;
 
-  // Trending fields
+  
   final bool isTrending;
   final int views;
 
@@ -41,7 +41,7 @@ class News {
       'isTrending': isTrending,
       'views': views,
     };
-    // publishedAt-ஐ பொதுவா service-ல set பண்ணுவது நல்லது; உங்களுக்கு இந்த flag வேண்டும் என்றால் வைத்துக்கொள்ளலாம்.
+    
     if (forCreate && status.toLowerCase() == 'published') {
       map['publishedAt'] = FieldValue.serverTimestamp();
     }

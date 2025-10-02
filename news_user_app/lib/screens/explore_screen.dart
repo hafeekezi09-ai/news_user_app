@@ -1,9 +1,9 @@
-// lib/screens/explore_screen.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../models/news.dart';
-import '../utils/formatters.dart'; // if you don't have timeAgo, remove usages
+import '../utils/formatters.dart'; 
 import 'news_detail_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // 👈 only 2 tabs now
+      length: 2, 
       child: Scaffold(
         body: SafeArea(
           child: NestedScrollView(
@@ -30,7 +30,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   'Daily News',
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
-actions: [   // 👈 add here
+actions: [   
     IconButton(
       icon: const Icon(Icons.notifications_none),
       onPressed: () {
@@ -144,7 +144,7 @@ class _TrendingList extends StatelessWidget {
     final q = FirebaseFirestore.instance
         .collection('news')
         .where('status', isEqualTo: 'published')
-        .where('isTrending', isEqualTo: true) // ✅ use trending flag
+        .where('isTrending', isEqualTo: true) //  use trending flag
         .orderBy('publishedAt', descending: true)
         .limit(50);
 

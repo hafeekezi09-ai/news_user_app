@@ -1,7 +1,7 @@
 class Category {
-  final String? id; // nullable on create in admin app
+  final String? id; 
   final String name;
-  final String type; // magazine | newspaper | article
+  final String type; 
   final String? coverUrl;
   final String? content;
   final String? featureTitle;

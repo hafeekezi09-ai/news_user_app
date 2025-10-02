@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoryChipsBar extends StatelessWidget {
-  /// Pass in a ValueNotifier to share selected state with the parent.
+  
   final ValueNotifier<String?> selectedCategoryId;
 
   const CategoryChipsBar({super.key, required this.selectedCategoryId});
@@ -29,7 +29,7 @@ class CategoryChipsBar extends StatelessWidget {
           }
 
           final docs = snap.data!.docs;
-          // Build: All + Trending + categories
+          
           final chips = <Widget>[];
 
           // All chip
@@ -39,14 +39,14 @@ class CategoryChipsBar extends StatelessWidget {
             onSelected: () => selectedCategoryId.value = null,
           ));
 
-          // 🔹 Trending chip
+          //  Trending chip
           chips.add(_Choice(
             label: 'Trending',
             selected: selectedCategoryId.value == '_trending',
             onSelected: () => selectedCategoryId.value = '_trending',
           ));
 
-          // Category chips from Firestore
+        
           for (final d in docs) {
             final name = (d['name'] ?? '').toString();
             final id = d.id;

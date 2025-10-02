@@ -31,7 +31,7 @@ class NewspapersScreen extends StatelessWidget {
           }
 
           final width = MediaQuery.of(context).size.width;
-          // Responsive columns: 2 (phone), 3 (tablet), 5 (desktop)
+          
           final crossAxisCount = width < 520 ? 2 : (width < 900 ? 3 : 5);
 
           return GridView.builder(
@@ -40,7 +40,7 @@ class NewspapersScreen extends StatelessWidget {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 3 / 4, // portrait-ish tile
+              childAspectRatio: 3 / 4, 
             ),
             itemCount: docs.length,
             itemBuilder: (context, i) {
@@ -89,7 +89,7 @@ class _NewspaperCard extends StatelessWidget {
         onTap: onTap,
         child: Column(
           children: [
-            // Square logo/cover looks nice for newspapers
+            
             AspectRatio(
               aspectRatio: 1, // 1:1
               child: imageUrl.isNotEmpty

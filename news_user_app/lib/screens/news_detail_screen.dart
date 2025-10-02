@@ -17,7 +17,7 @@ class NewsDetailScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share_outlined),
             onPressed: () {
-              // hook share_plus if you want
+              
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Shared!')),
               );
@@ -34,9 +34,9 @@ class NewsDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
                   news.imageUrl,
-                  height: 200,          // ✅ small fixed height
+                  height: 200,          
                   width: double.infinity,
-                  fit: BoxFit.contain,  // ✅ show full image (not cropped)
+                  fit: BoxFit.contain,  
                   errorBuilder: (_, __, ___) => Container(
                     color: Colors.grey.shade200,
                     alignment: Alignment.center,
@@ -47,7 +47,7 @@ class NewsDetailScreen extends StatelessWidget {
               ),
             ),
           Container(
-            color: const Color(0xFFEAF5E7), // soft green like your theme
+            color: const Color(0xFFEAF5E7), 
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
