@@ -1,6 +1,12 @@
+// lib/screens/root_screen.dart
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'package:news_user_app/screens/newspaper_screens.dart';
+
+import 'explore_screen.dart';
 import 'categories_screen.dart';
+import 'magazines_screen.dart';
+
+import 'articles_screen.dart';
 import 'search_screen.dart';
 
 class RootScreen extends StatefulWidget {
@@ -13,22 +19,52 @@ class RootScreen extends StatefulWidget {
 class _RootScreenState extends State<RootScreen> {
   int _index = 0;
 
-  final _pages = const [HomeScreen(), CategoriesScreen(), SearchScreen()];
+  // Keep pages alive (state preserved when switching tabs)
+  final List<Widget> _pages = const [
+    ExploreScreen(),     // Home
+    CategoriesScreen(),  // All categories
+    MagazinesScreen(),   // Premium magazines (glossy grid)
+    NewspapersScreen(),  // Daily newspapers (simple list)
+    ArticlesScreen(),    // Articles feed (blog-style)
+    SearchScreen(),      // Search
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_index],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-          NavigationDestination(
+      body: IndexedStack(
+        index: _index,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _index,
+        onTap: (i) => setState(() => _index = i),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.category_outlined),
             label: 'Categories',
           ),
-          NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book_outlined),
+            label: 'Magazines',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.newspaper),
+            label: 'Newspapers',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.description_outlined),
+            label: 'Articles',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
         ],
       ),
     );

@@ -1,13 +1,46 @@
 class Category {
-  final String id;
+  final String? id; // nullable on create in admin app
   final String name;
+  final String type; // magazine | newspaper | article
+  final String? coverUrl;
+  final String? content;
+  final String? featureTitle;
+  final String? featureContent;
+  final String? featureImageUrl;
 
-  Category({required this.id, required this.name});
+  Category({
+    this.id,
+    required this.name,
+    required this.type,
+    this.coverUrl,
+    this.content,
+    this.featureTitle,
+    this.featureContent,
+    this.featureImageUrl,
+  });
 
-  factory Category.fromMap(String id, Map<String, dynamic> map) {
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'type': type,
+      'coverUrl': coverUrl,
+      'content': content,
+      'featureTitle': featureTitle,
+      'featureContent': featureContent,
+      'featureImageUrl': featureImageUrl,
+    };
+  }
+
+  factory Category.fromMap(String id, Map<String, dynamic> data) {
     return Category(
       id: id,
-      name: (map['name'] ?? '').toString(),
+      name: (data['name'] ?? '').toString(),
+      type: (data['type'] ?? 'article').toString(),
+      coverUrl: data['coverUrl'] as String?,
+      content: data['content'] as String?,
+      featureTitle: data['featureTitle'] as String?,
+      featureContent: data['featureContent'] as String?,
+      featureImageUrl: data['featureImageUrl'] as String?,
     );
   }
 }

@@ -11,17 +11,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Firebase core (required to initialize Firebase)
+  # Firebase
   firebase_core: ^3.0.0
+  cloud_firestore: ^5.0.0
   firebase_messaging: ^15.0.0
 
-  # Firestore (to fetch news & categories)
-  cloud_firestore: ^5.0.0
+  # UI/UX enhancements
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  share_plus: ^10.0.2
+  url_launcher: ^6.3.0
 
-  # For date/time formatting
+  # Utils
   intl: ^0.19.0
-
-  # For icons
   cupertino_icons: ^1.0.8
 
 dev_dependencies:

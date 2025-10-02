@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:news_user_app/models/categories.dart';
-import '../services/category_service.dart';
-import '../services/news_service.dart';
-  // ✅ FIXED import
-import '../models/news.dart';
-import '../widgets/news_card.dart';
-import 'news_detail_screen.dart';
+import 'package:news_user_app/services/category_service.dart';
+import 'category_feed_screen.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -15,67 +11,57 @@ class CategoriesScreen extends StatelessWidget {
     final catService = CategoryService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Categories")),
+      appBar: AppBar(
+        title: const Text("Categories"),
+      ),
       body: StreamBuilder<List<Category>>(
-        stream: catService.getCategories(),
+        stream: catService.streamAll(), // get all categories as a stream
         builder: (context, snap) {
-          if (!snap.hasData) {
+          if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          final cats = snap.data!;
-          if (cats.isEmpty) return const Center(child: Text("No categories yet."));
+          if (snap.hasError) {
+            return Center(child: Text("Error: ${snap.error}"));
+          }
+
+          final cats = snap.data ?? [];
+          if (cats.isEmpty) {
+            return const Center(child: Text("No categories yet."));
+          }
+
           return ListView.separated(
             itemCount: cats.length,
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, i) {
               final c = cats[i];
               return ListTile(
-                title: Text(c.name),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                leading: (c.coverUrl != null && c.coverUrl!.isNotEmpty)
+                    ? CircleAvatar(backgroundImage: NetworkImage(c.coverUrl!))
+                    : const CircleAvatar(child: Icon(Icons.category)),
+                title: Text(
+                  c.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  [
+                    c.type,
+                    if (c.content != null && c.content!.isNotEmpty) c.content!,
+                  ].join(' • '),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 onTap: () {
+                  // Navigate to feed filtered by this category
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => _CategoryNewsList(category: c)),
+                    MaterialPageRoute(
+                      builder: (_) => CategoryFeedScreen(
+                        categoryId: c.id ?? '',
+                        categoryName: c.name,
+                      ),
+                    ),
                   );
                 },
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _CategoryNewsList extends StatelessWidget {
-  final Category category;
-  const _CategoryNewsList({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    final newsService = NewsService();
-    return Scaffold(
-      appBar: AppBar(title: Text(category.name)),
-      body: StreamBuilder<List<News>>(
-        stream: newsService.getNewsByCategory(category.id),
-        builder: (context, snap) {
-          if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final items = snap.data!;
-          if (items.isEmpty) {
-            return const Center(child: Text("No news in this category."));
-          }
-          return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, i) {
-              final n = items[i];
-              return NewsCard(
-                news: n,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => NewsDetailScreen(news: n)),
-                ),
               );
             },
           );

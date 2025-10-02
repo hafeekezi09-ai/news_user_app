@@ -3,44 +3,79 @@ import '../models/news.dart';
 
 class NewsService {
   final _db = FirebaseFirestore.instance;
+  CollectionReference<Map<String, dynamic>> get _news => _db.collection('news');
 
-  CollectionReference<Map<String, dynamic>> get _news =>
-      _db.collection('news');
-
-  Stream<List<News>> getPublishedNews() {
-    return _news
-        .where('status', isEqualTo: 'published')
-        .snapshots()
-        .map((snap) {
-      final items = snap.docs
-          .map((d) => News.fromMap(d.id, d.data()))
-          .toList();
-
-      items.sort((a, b) {
-        final aTime = a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bTime = b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return bTime.compareTo(aTime); // newest first
-      });
-      return items;
+  // ---------- helpers ----------
+  List<News> _sortByPublishedAtDesc(Iterable<News> items) {
+    final list = items.toList();
+    list.sort((a, b) {
+      final aT = a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bT = b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bT.compareTo(aT);
     });
+    return list;
   }
 
-  Stream<List<News>> getNewsByCategory(String categoryId) {
+  // ---------- streams ----------
+  /// All published (client-side sort => no composite index needed)
+  Stream<List<News>> streamPublished({int limit = 50}) {
+    return _news
+        .where('status', isEqualTo: 'published')
+        .limit(limit)
+        .snapshots()
+        .map((s) => _sortByPublishedAtDesc(
+              s.docs.map((d) => News.fromMap(d.id, d.data())),
+            ));
+  }
+
+  /// Published by category (client-side sort)
+  Stream<List<News>> streamByCategory(String categoryId, {int limit = 50}) {
     return _news
         .where('status', isEqualTo: 'published')
         .where('categoryId', isEqualTo: categoryId)
+        .limit(limit)
         .snapshots()
-        .map((snap) {
-      final items = snap.docs
-          .map((d) => News.fromMap(d.id, d.data()))
-          .toList();
+        .map((s) => _sortByPublishedAtDesc(
+              s.docs.map((d) => News.fromMap(d.id, d.data())),
+            ));
+  }
 
-      items.sort((a, b) {
-        final aTime = a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bTime = b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return bTime.compareTo(aTime);
-      });
-      return items;
+  /// Trending (client-side sort). Set [byViews]=true to rank by views first.
+  Stream<List<News>> streamTrending({bool byViews = false, int limit = 50}) {
+    return _news
+        .where('status', isEqualTo: 'published')
+        .where('isTrending', isEqualTo: true)
+        .limit(limit)
+        .snapshots()
+        .map((s) {
+      var items = s.docs.map((d) => News.fromMap(d.id, d.data())).toList();
+      if (byViews) {
+        items.sort((a, b) {
+          final v = b.views.compareTo(a.views); // popularity first
+          if (v != 0) return v;
+          final aT = a.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bT = b.publishedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bT.compareTo(aT);
+        });
+        return items;
+      }
+      return _sortByPublishedAtDesc(items);
     });
   }
+
+  // ---------- utilities ----------
+  Future<void> incrementViews(String id) async {
+    await _news.doc(id).update({'views': FieldValue.increment(1)});
+  }
+
+  Future<News?> getById(String id) async {
+    final d = await _news.doc(id).get();
+    if (!d.exists) return null;
+    return News.fromMap(d.id, d.data()!);
+  }
+
+  // legacy aliases (if older code calls these)
+  Stream<List<News>> getPublishedNews() => streamPublished();
+  Stream<List<News>> getNewsByCategory(String categoryId) =>
+      streamByCategory(categoryId);
 }

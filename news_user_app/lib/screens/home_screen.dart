@@ -3,47 +3,163 @@ import '../services/news_service.dart';
 import '../models/news.dart';
 import '../widgets/news_card.dart';
 import 'news_detail_screen.dart';
+import '../widgets/category_chips_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final service = NewsService();
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  final _service = NewsService();
+
+  /// null => All, '_trending' => Trending, otherwise categoryId
+  final ValueNotifier<String?> _selectedCategoryId =
+      ValueNotifier<String?>(null);
+
+  Future<void> _refresh() async {
+    setState(() {});
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
+
+  @override
+  void dispose() {
+    _selectedCategoryId.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Latest News")),
-      body: StreamBuilder<List<News>>(
-        stream: service.getPublishedNews(),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snap.hasError) {
-            return Center(child: Text("Error: ${snap.error}"));
-          }
-          final items = snap.data ?? [];
-          if (items.isEmpty) {
-            return const Center(child: Text("No news published yet."));
-          }
-          return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, i) {
-              final n = items[i];
-              return NewsCard(
-                news: n,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => NewsDetailScreen(news: n),
-                    ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ValueListenableBuilder<String?>(
+          valueListenable: _selectedCategoryId,
+          builder: (context, selectedId, _) {
+            // pick stream based on chips
+            final Stream<List<News>> stream = switch (selectedId) {
+              null => _service.streamPublished(),
+              '_trending' => _service.streamTrending(), // or byViews: true
+              String id => _service.streamByCategory(id),
+            };
+
+            return StreamBuilder<List<News>>(
+              stream: stream,
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const CustomScrollView(
+                    slivers: [
+                      _HomeAppBar(),
+                      _ChipsSliver(),
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
                   );
-                },
-              );
-            },
-          );
-        },
+                }
+
+                if (snap.hasError) {
+                  return const CustomScrollView(
+                    slivers: [
+                      _HomeAppBar(),
+                      _ChipsSliver(),
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: Text('Error loading news')),
+                      ),
+                    ],
+                  );
+                }
+
+                final items = snap.data ?? [];
+                if (items.isEmpty) {
+                  return const CustomScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      _HomeAppBar(),
+                      _ChipsSliver(),
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: Text('No news found.')),
+                      ),
+                    ],
+                  );
+                }
+
+                return CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    const _HomeAppBar(),
+                    _ChipsSliver(selectedCategoryId: _selectedCategoryId),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      sliver: SliverList.builder(
+                        itemCount: items.length,
+                        itemBuilder: (context, i) {
+                          final n = items[i];
+                          return NewsCard(
+                            news: n,
+                            onTap: () {
+                              // optional: bump views
+                              final id = n.id;
+                              if (id != null) {
+                                NewsService().incrementViews(id);
+                              }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NewsDetailScreen(news: n),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeAppBar extends StatelessWidget {
+  const _HomeAppBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      floating: true,
+      snap: true,
+      title: const Text('Latest News'),
+    );
+  }
+}
+
+class _ChipsSliver extends StatelessWidget {
+  final ValueNotifier<String?>? selectedCategoryId;
+  const _ChipsSliver({this.selectedCategoryId});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 4),
+        child: CategoryChipsBar(
+          // CategoryChipsBar must set .value to:
+          //   null        -> All
+          //   '_trending' -> Trending
+          //   '<id>'      -> category id
+          selectedCategoryId:
+              selectedCategoryId ?? ValueNotifier<String?>(null),
+        ),
       ),
     );
   }
